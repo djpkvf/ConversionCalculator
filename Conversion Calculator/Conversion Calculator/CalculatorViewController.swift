@@ -14,11 +14,12 @@ class CalculatorViewController: UIViewController {
     @IBOutlet weak var convertToTextField: UITextField!
     
     var conversion = Conversion(convertFrom: Conversion.Symbols.fahrenheit, convertTo: Conversion.Symbols.celcius)
+    var isDecimalAdded: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        updateConversion(number: 0)
+        clearBoard()
     }
 
     override func didReceiveMemoryWarning() {
@@ -26,21 +27,29 @@ class CalculatorViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func updateConversion(number: Int) {
-        if var convertFromText = convertFromTextField.text, let number = Character(UnicodeScalar(number)!) {
-            convertFromText.insert(number, at: convertFromText.endIndex - 2)
+    func updateConversion(number: String) {
+        if let convertFromText = convertFromTextField, let number = UnicodeScalar(number) {
+            convertFromText.text!.insert(Character(number), at: convertFromText.text!.index(convertFromText.text!.endIndex, offsetBy: -2))
+            convertToTextField.text = conversion.convertValues(convertFrom: convertFromText.text!, convertTo: conversion.to)
         }
-        convertToTextField.text = conversion.to.rawValue
     }
     
     func clearBoard() {
         convertFromTextField.text = conversion.from.rawValue
         convertToTextField.text = conversion.to.rawValue
+        isDecimalAdded = false
     }
     
     @IBAction func numberPressed(_ sender: UIButton) {
         if let number = sender.titleLabel?.text {
-            updateConversion(number: Int(number)!)
+            if number == "." && isDecimalAdded == false && (convertFromTextField.text?.characters.count)! > 2 {
+                isDecimalAdded = true
+                updateConversion(number: number)
+            } else if number == "." && isDecimalAdded == true {
+                return
+            } else {
+                updateConversion(number: number)
+            }
         }
     }
     
@@ -74,6 +83,21 @@ class CalculatorViewController: UIViewController {
         }))
         self.present(alert, animated: true, completion: nil)
     }
+    
+    @IBAction func signChangePressed(_ sender: Any) {
+        if var convertFromText = convertFromTextField.text {
+            if convertFromText.characters.count == 2 {
+                return
+            } else if convertFromText.contains("-") {
+                convertFromText.remove(at: convertFromText.startIndex)
+            } else {
+                convertFromText = "-\(convertFromText)"
+            }
+            convertFromTextField.text = convertFromText
+            convertToTextField.text = conversion.convertValues(convertFrom: convertFromText, convertTo: conversion.to)
+        }
+    }
+    
     @IBAction func clearPressed(_ sender: Any) {
         clearBoard()
     }

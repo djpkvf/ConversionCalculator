@@ -23,4 +23,25 @@ class Conversion {
         case fahrenheit = "°F"
         case celcius = "°C"
     }
+    
+    func convertValues(convertFrom: String, convertTo: Symbols) -> String {
+        
+        let start = convertFrom.startIndex
+        let end = convertFrom.index(convertFrom.endIndex, offsetBy: -2)
+        let range = start..<end
+        
+        let convertValue: Double = Double(convertFrom.substring(with: range))!
+        
+        // Switch case for distinguishing what function to convert to
+        switch convertTo {
+            case .miles:
+                return String(format: "%0.3f", convertValue / 1.60934) + convertTo.rawValue
+            case .kilometers:
+                return String(format: "%0.3f", convertValue * 1.60934) + convertTo.rawValue
+            case .fahrenheit:
+                return String(format: "%0.3f", (convertValue * (9/5)) + 32) + convertTo.rawValue
+            case .celcius:
+                return String(format: "%0.3f", (convertValue - 32) * (5/9)) + convertTo.rawValue
+        }
+    }
 }
